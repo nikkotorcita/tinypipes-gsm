@@ -76,12 +76,13 @@ void TinyPipe::sendParameter(char *tag, int val, char *mobileNumber)
     clearSerialBuffer();
 }
 
-char *TinyPipe::checkNewSMS(char *mobileNumber)
+String TinyPipe::checkNewSMS(char *mobileNumber)
 {
     int i = 0;
     int ret = 0;
-    int timeout = 20000;
-    unsigned long previous = 0;
+    int s1 = 0;
+    int s2 = 0;
+    String sms, str;
 
     if(Serial.available() == 0) {
         return NULL;
@@ -89,27 +90,25 @@ char *TinyPipe::checkNewSMS(char *mobileNumber)
 
     clearString(SMS, SMS_SIZE);
 
-    previous = millis();
-
-    while(Serial.available() && (millis() - previous) < timeout) {
+    while(Serial.available() > 0) {
         SMS[i] = Serial.read();
         i++;
 
-        if(strstr(SMS, mobileNumber) != NULL)
-            ret = 1;
+        if(strstr(SMS, mobileNumber) != NULL) {
+            ret = 1;        
+        }
     }
 
-    if(ret)
-        Serial.println(SMS);
-    else {
-        Serial.println("message from unidentified source");
-        clearString(SMS, SMS_SIZE);
+    if(ret > 0) {
+        str = SMS;
+        s1 = str.indexOf("\n") + 1;
+        s2 = str.indexOf("\r", s1);
+        sms = str.substring(s1, s2);
     }
 
     delay(1000);
-    clearSerialBuffer();
 
-    return SMS;
+    return sms;
 }
 
 String TinyPipe::getLocalTimestamp()

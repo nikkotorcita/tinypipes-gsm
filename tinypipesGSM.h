@@ -24,11 +24,56 @@ class TinyPipe {
     public:
         TinyPipe();
         ~TinyPipe();
+        /*
+         * Attaches the Arduino's Serial object to the Tinypipe class
+         * 
+         * Parameters   : 
+         *      baud     the desired baud rate
+         *
+         * Returns      : 
+         *      none
+         */
         void serialAttach(long baud);
-        void serialAttach(int rx, int tx, int baud);
+        
+        /*
+         * Checks whether a GSM module is available on the serial port or not
+         *
+         * Parameters   :
+         *      none
+         *
+         * Returns      :
+         *     true if a GSM module is available
+         */
         bool available();
-        void sendParameter(char *tag, int val, char *mobileNumber);
-        char *checkNewSMS(char *mobileNumber);
+        
+        /*
+         * Sends an SMS message to the specified mobile number
+         * Parameters   :
+         *      tag     string of characters that can be used to describe the payload data
+         *      val     the payload data as an SMS message
+         *      mobileNumber    the mobile number of the receiving device. Should be in
+         *                      international format e.g. +639175878280
+         * Returns      :
+         *      none
+         */
+         void sendParameter(char *tag, int val, char *mobileNumber);
+
+        /*
+         * Checks whether a new SMS message has arrived from the specified mobile number
+         * Parameters   :
+         *      mobileNumber    the mobile number to check messages from
+         * Returns      :
+         *      none
+         */
+        String checkNewSMS(char *mobileNumber);
+        
+        /*
+         * Returns the local date and time in yy/MM/dd,hh:mm:ss format
+         * Parameters
+         *      none
+         * Returns
+         *      The local timestamp
+         */
         String getLocalTimestamp();
     
     private: 
