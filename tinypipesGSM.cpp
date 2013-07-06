@@ -37,7 +37,7 @@ bool TinyPipe::available()
 
     return isConnected;
 }
-#if 1
+
 void TinyPipe::sendParameter(char *tag, int val, char *mobileNumber)
 {
     char charVal[20];
@@ -75,57 +75,55 @@ void TinyPipe::sendParameter(char *tag, int val, char *mobileNumber)
     delay(1000);
     clearSerialBuffer();
 }
-#endif
-int TinyPipe::checkNewSMS()
+
+char *TinyPipe::checkNewSMS(char *mobileNumber)
 {
     int i = 0;
     int ret = 0;
+    int timeout = 20000;
+    unsigned long previous = 0;
 
     if(Serial.available() == 0) {
-        return ret;
+        return NULL;
     }
 
     clearString(SMS, SMS_SIZE);
 
-    while(Serial.available() > 0 && ret == 0) {
+    previous = millis();
+
+    while(Serial.available() && (millis() - previous) < timeout) {
         SMS[i] = Serial.read();
         i++;
 
-        if(strstr(SMS, "enable") != NULL) {
-            ret = PANEL_ENABLE;        
-        }
-        else if(strstr(SMS, "disable") != NULL) {
-            ret = PANEL_DISABLE;
-        }
-        else if(strstr(SMS, "read") != NULL) {
-            ret = PARAM_READ;
-        }
+        if(strstr(SMS, mobileNumber) != NULL)
+            ret = 1;
     }
 
-    if(ret > 0) {
+    if(ret)
         Serial.println(SMS);
-        delay(1000);
-        clearSerialBuffer();
+    else {
+        Serial.println("message from unidentified source");
+        clearString(SMS, SMS_SIZE);
     }
 
     delay(1000);
+    clearSerialBuffer();
 
-    return ret;
+    return SMS;
 }
 
 String TinyPipe::getLocalTimestamp()
 {
     int i = 0;
     int timeout = 2000;
+    int s1 = 0;
+    int s2 = 0;
     bool ans = false;
     unsigned long previous;
     String timestamp;
 
     clearString(LOCAL_TIME, TS_SIZE);
-    
-    while(Serial.available() > 0) {
-        Serial.read();
-    }
+    clearSerialBuffer();
     
     Serial.println(AT_GET_LOCAL_TIME);
     previous = millis();
@@ -139,8 +137,9 @@ String TinyPipe::getLocalTimestamp()
     
     if(strstr(LOCAL_TIME, RESPONSE_LOCAL_TIME) != NULL) {
         timestamp = String(LOCAL_TIME);
-        Serial.println(timestamp.substring(5, 25));
-        return timestamp.substring(5, 25);
+        s1 = timestamp.indexOf("\"") + 1;
+        s2 = timestamp.indexOf("\"", s1);
+        return timestamp.substring(s1, s2);
     }
     else {
         return NULL;

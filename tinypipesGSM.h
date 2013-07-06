@@ -2,7 +2,7 @@
 #define _TINYPIPE_H_
 
 #define SMS_SIZE                        500 
-#define TS_SIZE                         40
+#define TS_SIZE                         60
 
 #define AT                              "AT"
 #define AT_SMS_TEXT_MODE                "AT+CMGF=1"
@@ -28,7 +28,7 @@ class TinyPipe {
         void serialAttach(int rx, int tx, int baud);
         bool available();
         void sendParameter(char *tag, int val, char *mobileNumber);
-        int checkNewSMS();
+        char *checkNewSMS(char *mobileNumber);
         String getLocalTimestamp();
     
     private: 
